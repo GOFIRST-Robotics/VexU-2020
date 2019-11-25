@@ -1,6 +1,8 @@
 #pragma once
 #include "main.h"
 
+using namespace okapi::literals;
+
 #define SYSTEM_LOOP_DELAY 10_ms
 
 class System {

@@ -1,20 +1,8 @@
 #include "main.h"
 
-/**
- * A callback function for LLEMU's center button.
- *
- * When this callback is fired, it will toggle line 2 of the LCD text between
- * "I was pressed!" and nothing.
- */
-void on_center_button() {
-	static bool pressed = false;
-	pressed = !pressed;
-	if (pressed) {
-		pros::lcd::set_text(2, "I was pressed!");
-	} else {
-		pros::lcd::clear_line(2);
-	}
-}
+using namespace okapi::literals;
+
+std::shared_ptr<MecanumDrive> drive;
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -23,10 +11,11 @@ void on_center_button() {
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	pros::lcd::initialize();
-	pros::lcd::set_text(1, "Hello PROS User!");
-
-	pros::lcd::register_btn1_cb(on_center_button);
+	drive = std::make_shared<MecanumDrive>(std::make_shared<okapi::MotorGroup>(std::initializer_list<okapi::Motor>({okapi::Motor(0), okapi::Motor(1)})), 
+										   std::make_shared<okapi::MotorGroup>(std::initializer_list<okapi::Motor>({okapi::Motor(2), okapi::Motor(3)})), 
+										   std::make_shared<okapi::MotorGroup>(std::initializer_list<okapi::Motor>({okapi::Motor(4), okapi::Motor(5)})), 
+										   std::make_shared<okapi::MotorGroup>(std::initializer_list<okapi::Motor>({okapi::Motor(5), okapi::Motor(7)})),
+										   6_in, 12_in);
 }
 
 /**
@@ -82,11 +71,11 @@ void opcontrol() {
 		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
 		                 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
 		                 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);
-		int left = master.get_analog(ANALOG_LEFT_Y);
-		int right = master.get_analog(ANALOG_RIGHT_Y);
+		int x = master.get_analog(ANALOG_LEFT_Y);
+		int y = master.get_analog(ANALOG_LEFT_X);
+		int rot = master.get_analog(ANALOG_RIGHT_X);
 
-		left_mtr = left;
-		right_mtr = right;
+		drive->drive(x / 127, y / 127, rot / 127);
 		pros::delay(20);
 	}
 }

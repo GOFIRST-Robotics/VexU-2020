@@ -1,15 +1,16 @@
 #pragma once
 
-#include "system.h"
+#include "gopher/system.h"
 
 // Theoretical top speed is ~1 m/s
 #define DRIVE_MP_SPEED 0.5 // m/s
 #define DRIVE_MP_ACC 0.5 // m/s^2
 #define DRIVE_MP_JERK 10 // m/s^3
 
-class TankDrive: public System, public okapi::ControllerInput<double>, public okapi::ControllerOutput<double> {
+class MecanumDrive: public System {
     public:
-    TankDrive(std::shared_ptr<okapi::AbstractMotor> leftDT, std::shared_ptr<okapi::AbstractMotor> rightDT, okapi::QLength wheelDia, okapi::QLength wheelbase);
+    MecanumDrive(std::shared_ptr<okapi::AbstractMotor> fl, std::shared_ptr<okapi::AbstractMotor> fr, 
+                 std::shared_ptr<okapi::AbstractMotor> rl, std::shared_ptr<okapi::AbstractMotor> rr, okapi::QLength wheelDia, okapi::QLength wheelbase);
     std::shared_ptr<okapi::ChassisController> getChassis();
 
     void preparePath(std::initializer_list<okapi::PathfinderPoint> iwaypoints, const std::string &ipathId);
@@ -17,10 +18,7 @@ class TankDrive: public System, public okapi::ControllerInput<double>, public ok
     void drivePathReverse(const std::string &pathid);
     void waitUntilSettled();
     void pointToAngle(okapi::QAngle angle);
-    void pointToPoint(okapi::QLength x, okapi::QLength y);
-
-    double controllerGet() override;
-    void controllerSet(double output) override;
+    void drive(float x, float y, float rot);
 
     enum State {
         OpenLoop = 0,
@@ -30,10 +28,8 @@ class TankDrive: public System, public okapi::ControllerInput<double>, public ok
     };
 
     private:
-    std::shared_ptr<okapi::AbstractMotor> leftMotors;
-    std::shared_ptr<okapi::AbstractMotor> rightMotors;
     std::shared_ptr<okapi::ChassisController> chassis;
     std::shared_ptr<okapi::AsyncMotionProfileController> mpController;
-    TankDrive::State state = TankDrive::State::OpenLoop;
+    MecanumDrive::State state = MecanumDrive::State::OpenLoop;
     void loop() override;
 };
