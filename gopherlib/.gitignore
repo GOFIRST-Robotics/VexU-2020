@@ -1,0 +1,8 @@
+.vscode
+bin
+firmware
+include/display
+include/okapi
+include/pros
+include/api.h
+*.zip
