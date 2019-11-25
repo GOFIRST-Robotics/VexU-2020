@@ -18,3 +18,4 @@ temp.errors
 # Custom things
 .src/
 .include/
+firmware/
