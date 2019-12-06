@@ -1,8 +1,15 @@
 #include "main.h"
+#include "mecanumdrive.h"
+#include "arm.h"
+#include "tray.h"
+#include "intake.h"
 
 using namespace okapi::literals;
 
 std::shared_ptr<MecanumDrive> drive;
+std::shared_ptr<Tray> tray;
+std::shared_ptr<Arm> arm;
+std::shared_ptr<Intake> intake;
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -11,11 +18,15 @@ std::shared_ptr<MecanumDrive> drive;
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	drive = std::make_shared<MecanumDrive>(std::make_shared<okapi::MotorGroup>(std::initializer_list<okapi::Motor>({okapi::Motor(0), okapi::Motor(1)})), 
-										   std::make_shared<okapi::MotorGroup>(std::initializer_list<okapi::Motor>({okapi::Motor(2), okapi::Motor(3)})), 
-										   std::make_shared<okapi::MotorGroup>(std::initializer_list<okapi::Motor>({okapi::Motor(4), okapi::Motor(5)})), 
-										   std::make_shared<okapi::MotorGroup>(std::initializer_list<okapi::Motor>({okapi::Motor(5), okapi::Motor(7)})),
+	drive = std::make_shared<MecanumDrive>(std::make_shared<okapi::MotorGroup>(std::initializer_list<okapi::Motor>({okapi::Motor(7), okapi::Motor(-8)})), 
+										   std::make_shared<okapi::MotorGroup>(std::initializer_list<okapi::Motor>({okapi::Motor(3), okapi::Motor(-4)})), 
+										   std::make_shared<okapi::MotorGroup>(std::initializer_list<okapi::Motor>({okapi::Motor(-9), okapi::Motor(10)})), 
+										   std::make_shared<okapi::MotorGroup>(std::initializer_list<okapi::Motor>({okapi::Motor(-1), okapi::Motor(2)})),
 										   6_in, 12_in);
+	tray = std::make_shared<Tray>(std::make_shared<okapi::MotorGroup>(std::initializer_list<okapi::Motor>({okapi::Motor(14)})));
+	arm = std::make_shared<Arm>(std::make_shared<okapi::MotorGroup>(std::initializer_list<okapi::Motor>({okapi::Motor(-15), okapi::Motor(16)})));
+	intake = std::make_shared<Intake>(std::make_shared<okapi::MotorGroup>(std::initializer_list<okapi::Motor>({okapi::Motor(-11), okapi::Motor(-12)})),
+									  std::make_shared<okapi::MotorGroup>(std::initializer_list<okapi::Motor>({okapi::Motor(19), okapi::Motor(20)})));
 }
 
 /**
@@ -64,18 +75,39 @@ void autonomous() {}
  */
 void opcontrol() {
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
-	pros::Motor left_mtr(1);
-	pros::Motor right_mtr(2);
 
 	while (true) {
-		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
-		                 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
-		                 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);
-		int x = master.get_analog(ANALOG_LEFT_Y);
-		int y = master.get_analog(ANALOG_LEFT_X);
+		int x = master.get_analog(ANALOG_LEFT_X);
+		int y = master.get_analog(ANALOG_LEFT_Y);
 		int rot = master.get_analog(ANALOG_RIGHT_X);
 
-		drive->drive(x / 127, y / 127, rot / 127);
+		if (master.get_digital(DIGITAL_A)) {
+			intake->intake();
+		}
+		else if (master.get_digital(DIGITAL_B)) {
+			intake->reverse();
+		}
+		else {
+			intake->idle();
+		}
+		if (master.get_digital(DIGITAL_R1)) {
+			arm->movePower(1.0);
+		}
+		else if (master.get_digital(DIGITAL_R2)) {
+			arm->movePower(-1.0);
+		}
+		else {
+			arm->movePower(0.0);
+		}
+
+		if (master.get_digital(DIGITAL_L1)) {
+			tray->setAngle(60_deg);
+		}
+		if (master.get_digital(DIGITAL_L2)) {
+			tray->setAngle(0_deg);
+		}
+
+		drive->drive(x / 127.0, y / 127.0, rot / 127.0);
 		pros::delay(20);
 	}
 }

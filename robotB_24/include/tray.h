@@ -8,7 +8,7 @@ class Tray : public System {
     void waitUntilSettled();
 
     private:
-    okapi::QAngle target;
+    okapi::QAngle target = 0_deg;
     std::shared_ptr<okapi::MotorGroup> motor;
     std::shared_ptr<okapi::AsyncLinearMotionProfileController> almpc;
     void loop();

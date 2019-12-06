@@ -16,6 +16,5 @@ temp.errors
 .d/
 
 # Custom things
-.src/
-.include/
-firmware/
+build/.src/
+build/.include/

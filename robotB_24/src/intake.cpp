@@ -19,8 +19,8 @@ void Intake::reverse() {
 
 
 void Intake::loop() {
-    const int intake_speed = 600;
-    const int reverse_speed = -600;
+    const int intake_speed = 300;
+    const int reverse_speed = -300;
     switch (this->state) {
         case Intake::State::Idle:
         this->left->moveVelocity(0);

@@ -8,7 +8,7 @@ MecanumDrive::MecanumDrive(std::shared_ptr<okapi::AbstractMotor> fl, std::shared
     auto drive_gearset = fr->getGearing();
     this->chassis = okapi::ChassisControllerBuilder()
                     .withMotors(fl, fr, rr, rl)
-                    .withDimensions(drive_gearset, {wheelDia, wheelbase})
+                    .withDimensions(drive_gearset, {wheelDia / 1.414, wheelbase})
                     .build();
     
     this->mpController = okapi::AsyncMotionProfileControllerBuilder()

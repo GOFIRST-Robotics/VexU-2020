@@ -42,6 +42,9 @@
 #include "okapi/api.hpp"
 //#include "pros/api_legacy.h"
 #include "mecanumdrive.h"
+#include "tray.h"
+#include "arm.h"
+#include "intake.h"
 
 /**
  * If you find doing pros::Motor() to be tedious and you'd prefer just to do

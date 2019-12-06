@@ -7,9 +7,10 @@
 #define DRIVE_MP_ACC 0.5 // m/s^2
 #define DRIVE_MP_JERK 10 // m/s^3
 
-class TankDrive: public System, public okapi::ControllerInput<double>, public okapi::ControllerOutput<double> {
+class TankDrive: public System {
     public:
-    TankDrive(std::shared_ptr<okapi::AbstractMotor> leftDT, std::shared_ptr<okapi::AbstractMotor> rightDT, okapi::QLength wheelDia, okapi::QLength wheelbase);
+    TankDrive(std::shared_ptr<okapi::MotorGroup> leftDT, std::shared_ptr<okapi::MotorGroup> rightDT, okapi::QLength wheelDia, okapi::QLength wheelbase);
+    ~TankDrive();
     std::shared_ptr<okapi::ChassisController> getChassis();
 
     void preparePath(std::initializer_list<okapi::PathfinderPoint> iwaypoints, const std::string &ipathId);
@@ -17,10 +18,6 @@ class TankDrive: public System, public okapi::ControllerInput<double>, public ok
     void drivePathReverse(const std::string &pathid);
     void waitUntilSettled();
     void pointToAngle(okapi::QAngle angle);
-    void pointToPoint(okapi::QLength x, okapi::QLength y);
-
-    double controllerGet() override;
-    void controllerSet(double output) override;
 
     enum State {
         OpenLoop = 0,
@@ -30,8 +27,6 @@ class TankDrive: public System, public okapi::ControllerInput<double>, public ok
     };
 
     private:
-    std::shared_ptr<okapi::AbstractMotor> leftMotors;
-    std::shared_ptr<okapi::AbstractMotor> rightMotors;
     std::shared_ptr<okapi::ChassisController> chassis;
     std::shared_ptr<okapi::AsyncMotionProfileController> mpController;
     TankDrive::State state = TankDrive::State::OpenLoop;
